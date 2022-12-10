@@ -1,0 +1,22 @@
+{
+	"name": "basketball-game",
+	"version": "1.0.0",
+	"description": "Game written with PhaserJS and gsap",
+	"scripts": {
+		"start": "http-server -c-1 -p 3000",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/markradomski/basketball-game.git"
+	},
+	"author": "Mark Radomski",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/markradomski/basketball-game/issues"
+	},
+	"homepage": "https://github.com/markradomski/basketball-game#readme",
+	"dependencies": {
+		"http-server": "^14.1.1"
+	}
+}
