@@ -9,7 +9,13 @@ let config = {
 		create,
 		update,
 	},
-
+	physics: {
+		default: 'arcade',
+		arcade: {
+			debug: true,
+			gravity: { y: 2000 },
+		},
+	},
 	title: 'Basketball Game',
 	pixelArt: false, // anti-aliased
 };
@@ -38,7 +44,12 @@ function create() {
 		.setPosition(canvasWidth / 2, 203)
 		.setDepth(1);
 
-	this.ball = this.add.sprite(canvasWidth / 2, 500, 'basketball', 0).setScale(0.6);
+	this.ball = this.physics.add
+		.sprite(canvasWidth / 2, 500, 'basketball', 0)
+		.setScale(0.6)
+		.setInteractive()
+		.setBounce(0.95)
+		.setCollideWorldBounds(true);
 }
 
 function update() {}
