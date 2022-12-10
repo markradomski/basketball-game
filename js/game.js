@@ -1,10 +1,10 @@
-// our game's configuration
 let config = {
 	type: Phaser.AUTO,
 	width: 640,
 	height: 640,
 	backgroundColor: '#4488aa',
 	scene: {
+		init,
 		preload,
 		create,
 		update,
@@ -20,8 +20,11 @@ let config = {
 	pixelArt: false, // anti-aliased
 };
 
-// create the game, and pass it the configuration
 const game = new Phaser.Game(config);
+
+function init() {
+	this.score = 0;
+}
 
 // load asset files for our game
 function preload() {
@@ -37,21 +40,22 @@ function create() {
 	const canvasWidth = this.sys.game.config.width;
 	const canvasHeight = this.sys.game.config.height;
 
-	this.add.sprite(0, 0, 'backboard').setPosition(canvasWidth / 2, 150);
+	this.add.sprite(0, 0, 'backboard').setPosition(canvasWidth / 2, 250);
 
 	this.net = this.add
 		.sprite(0, 0, 'net')
-		.setPosition(canvasWidth / 2, 203)
+		.setPosition(canvasWidth / 2, 303)
 		.setDepth(1);
 
+	// Ball
 	this.ball = this.physics.add
 		.sprite(canvasWidth / 2, 500, 'basketball', 0)
 		.setScale(0.6)
+		//.setCircle(50) // causes some odd physics
 		.setInteractive()
-		.setBounce(0.95)
+		.setBounce(0.8)
 		.setCollideWorldBounds(true);
 
-	this.ball.body.drag.set(4);
 	//make ball draggable
 	this.input.setDraggable(this.ball);
 
@@ -66,19 +70,62 @@ function create() {
 		stopDrag(gameObject);
 	});
 
-	console.log('BALL', this.ball);
+	// net collision points
+	const zones = this.physics.add.staticGroup();
+
+	this.leftRim = this.add.zone(
+		this.net.x - this.net.displayOriginX,
+		this.net.y - this.net.displayOriginY + 5,
+		1,
+		1
+	);
+	this.rightRim = this.add.zone(
+		this.net.x - this.net.displayOriginX + this.net.width,
+		this.net.y - this.net.displayOriginY + 5,
+		1,
+		1
+	);
+
+	zones.add(this.leftRim);
+	zones.add(this.rightRim);
+	this.physics.add.collider(this.ball, zones, onCollision, null, this);
+
+	console.log('game', this);
 }
 
-function update() {}
+function update() {
+	this.ball.setAngularVelocity(this.ball.body.velocity.x);
+	console.log('update', this.ball.x, this.net.x, this.net.y);
 
-function startDrag(gameObject) {
-	//  You can't have a sprite being moved by physics AND input, so we disable the physics while being dragged
-	gameObject.body.moves = false;
+	if (
+		this.ball.x >= this.net.x &&
+		this.ball.x <= this.net.x + this.net.width &&
+		this.ball.y === this.net.y
+	) {
+		console.log('SCORE');
+	}
 }
 
-function stopDrag(gameObject) {
-	//  And re-enable it upon release
-	gameObject.body.moves = true;
+function onCollision(ball, zone) {
+	//	console.log('collsion', ball, zone);
+
+	if (ball.x < zone.x) {
+		ball.setVelocityX(-100);
+	} else if (ball.x > zone.x) {
+		ball.setVelocityX(100);
+	} else {
+		// stop ball bouncing straight up if it lands dead center
+		ball.setVelocityX(50 + Math.random() * 100);
+	}
 }
 
-function update() {}
+function startDrag(ball) {
+	//can't move sprite by physics AND input
+	ball.body.moves = false;
+	ball.setVelocity(0, 0);
+}
+
+function stopDrag(ball) {
+	//  re-enable it upon release
+	ball.body.moves = true;
+}
