@@ -50,6 +50,16 @@ function create() {
 		.setInteractive()
 		.setBounce(0.95)
 		.setCollideWorldBounds(true);
+
+	this.ball.body.drag.set(4);
+	//make ball draggable
+	this.input.setDraggable(this.ball);
+
+	// allow cursor to drag ball
+	this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+		gameObject.x = dragX;
+		gameObject.y = dragY;
+	});
 }
 
 function update() {}
