@@ -59,7 +59,26 @@ function create() {
 	this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
 		gameObject.x = dragX;
 		gameObject.y = dragY;
+		startDrag(gameObject);
 	});
+
+	this.input.on('dragend', function (pointer, gameObject) {
+		stopDrag(gameObject);
+	});
+
+	console.log('BALL', this.ball);
+}
+
+function update() {}
+
+function startDrag(gameObject) {
+	//  You can't have a sprite being moved by physics AND input, so we disable the physics while being dragged
+	gameObject.body.moves = false;
+}
+
+function stopDrag(gameObject) {
+	//  And re-enable it upon release
+	gameObject.body.moves = true;
 }
 
 function update() {}
