@@ -147,6 +147,8 @@ function startDrag(ball, context) {
 function stopDrag(ball, context) {
 	//  re-enable it upon release
 	ball.body.moves = true;
+	//prevent releasing ball while overlapping net and scoring
+	context.triggered = true;
 }
 
 function checkOverlap(spriteA, spriteB) {
