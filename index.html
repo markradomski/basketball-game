@@ -2,16 +2,25 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
 
 		<script src="js/phaser.min.js"></script>
 		<style>
-			canvas {
-				/* width: 100%; */
+			body {
+				font-family: Tahoma, Geneva, Verdana, sans-serif;
+			}
+			.text {
+				width: 640px;
+			}
+			.text p {
+				text-align: center;
 			}
 		</style>
 	</head>
 	<body>
+		<canvas id="game"></canvas>
+		<div class="text">
+			<p>Drag and drop basketball to shoot</p>
+		</div>
 		<script src="js/game.js"></script>
 	</body>
 </html>

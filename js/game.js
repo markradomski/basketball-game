@@ -1,33 +1,8 @@
-let config = {
-	type: Phaser.AUTO,
-	width: 640,
-	height: 640,
-	backgroundColor: '#4488aa',
-	scene: {
-		init,
-		preload,
-		create,
-		update,
-	},
-	physics: {
-		default: 'arcade',
-		arcade: {
-			debug: true,
-			gravity: { y: 2000 },
-		},
-	},
-	title: 'Basketball Game',
-	pixelArt: false, // anti-aliased
-};
-
-const game = new Phaser.Game(config);
-
 function init() {
 	this.canvasWidth = this.sys.game.config.width;
 	this.canvasHeight = this.sys.game.config.height;
 	this.score = 0;
 	this.triggered = false;
-	//	console.log('GSAP', gsap);
 }
 
 // load asset files for our game
@@ -44,18 +19,16 @@ function preload() {
 function create() {
 	this.add.sprite(this.canvasWidth / 2, 250, 'backboard');
 	this.net = this.add.sprite(this.canvasWidth / 2, 303, 'net').setDepth(1);
-	createSounds(this);
 	createBall(this);
 	createLeftRightRim(this);
 	createNetZone(this);
+	createSounds(this);
 
 	// score
-	this.scoreText = this.add.text(5, 5, 0, { font: '60px Arial', fill: '#FFF' });
-
-	/* 	gsap.to(this.scoreText, {
-		x: 200,
-		duration: 2,
-	}); */
+	this.scoreText = this.add.text(303, 50, 0, {
+		font: '80px Arial',
+		fill: '#FFF',
+	});
 
 	console.log('game', this);
 }
@@ -90,17 +63,23 @@ function createSounds(context) {
 
 function createBall(context) {
 	context.ball = context.physics.add
-		.sprite(context.canvasWidth / 2, 500, 'basketball', 0)
+		.sprite(context.canvasWidth / 2, 610, 'basketball', 0)
 		.setScale(0.6)
 		//.setCircle(50) // causes some odd physics
 		.setInteractive()
 		.setBounce(0.8)
-		.setCollideWorldBounds(true);
+		.setCollideWorldBounds(true)
+		.setVelocity(0);
 
 	context.ball.body.onWorldBounds = true;
 
+	console.log('BALL', context.ball.body.velocity);
+
 	context.physics.world.on('worldbounds', (body, up, down, left, right) => {
-		context.floorBounce.play();
+		// prevent AudioContext warning on initial poge load
+		if (context.sound.context.state !== 'suspended') {
+			context.floorBounce.play();
+		}
 	});
 
 	//make ball draggable
@@ -182,3 +161,28 @@ function isBallNetOverlap(context) {
 	const netTrigger = context.innerNet.body.touching;
 	return ballTrigger.down && netTrigger.up;
 }
+
+const config = {
+	type: Phaser.CANVAS,
+	canvas: document.getElementById('game'),
+	width: 640,
+	height: 640,
+	backgroundColor: '#4488aa',
+	scene: {
+		init,
+		preload,
+		create,
+		update,
+	},
+	physics: {
+		default: 'arcade',
+		arcade: {
+			debug: false,
+			gravity: { y: 2000 },
+		},
+	},
+	title: 'Basketball Game',
+	pixelArt: false, // anti-aliased
+};
+
+const game = new Phaser.Game(config);
