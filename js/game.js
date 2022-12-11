@@ -24,6 +24,7 @@ const game = new Phaser.Game(config);
 
 function init() {
 	this.score = 0;
+	this.triggered = false;
 }
 
 // load asset files for our game
@@ -40,12 +41,11 @@ function create() {
 	const canvasWidth = this.sys.game.config.width;
 	const canvasHeight = this.sys.game.config.height;
 
-	this.add.sprite(0, 0, 'backboard').setPosition(canvasWidth / 2, 250);
+	this.add.sprite(canvasWidth / 2, 250, 'backboard');
 
-	this.net = this.add
-		.sprite(0, 0, 'net')
-		.setPosition(canvasWidth / 2, 303)
-		.setDepth(1);
+	this.net = this.add.sprite(canvasWidth / 2, 303, 'net').setDepth(1);
+
+	//this.net.setBounds(20, 20);
 
 	// Ball
 	this.ball = this.physics.add
@@ -60,14 +60,14 @@ function create() {
 	this.input.setDraggable(this.ball);
 
 	// allow cursor to drag ball
-	this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+	this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
 		gameObject.x = dragX;
 		gameObject.y = dragY;
-		startDrag(gameObject);
+		startDrag(gameObject, this);
 	});
 
-	this.input.on('dragend', function (pointer, gameObject) {
-		stopDrag(gameObject);
+	this.input.on('dragend', (pointer, gameObject) => {
+		stopDrag(gameObject, this);
 	});
 
 	// net collision points
@@ -86,23 +86,42 @@ function create() {
 		1
 	);
 
+	this.net = this.add.zone(canvasWidth / 2, 290).setSize(20, 20);
+	this.physics.world.enable(this.net);
+	this.net.body.setAllowGravity(false);
+	this.net.body.moves = false;
+
 	zones.add(this.leftRim);
 	zones.add(this.rightRim);
 	this.physics.add.collider(this.ball, zones, onCollision, null, this);
+	this.physics.add.overlap(this.ball, this.net);
 
 	console.log('game', this);
 }
 
 function update() {
 	this.ball.setAngularVelocity(this.ball.body.velocity.x);
-	console.log('update', this.ball.x, this.net.x, this.net.y);
+	//console.log('update', this.ball.body.velocity.y);
 
-	if (
-		this.ball.x >= this.net.x &&
-		this.ball.x <= this.net.x + this.net.width &&
-		this.ball.y === this.net.y
-	) {
-		console.log('SCORE');
+	const ballTrigger = this.ball.body.touching;
+	const netTrigger = this.net.body.touching;
+	const ballNetOverlap = ballTrigger.down && netTrigger.up;
+	const velocityY = this.ball.body.velocity.y;
+
+	// if ball is released above net rim (no cheating)
+	if (ballNetOverlap && !this.triggered) {
+		this.score++;
+		this.triggered = true;
+		console.log('SCORE', this.score, this.ball.body.velocity.y);
+
+		// slow ball down while in net
+	} else if (ballNetOverlap) {
+		this.ball.setVelocityY(velocityY * 0.6);
+	}
+
+	// reset
+	if (!ballNetOverlap) {
+		this.triggered = false;
 	}
 }
 
@@ -119,13 +138,30 @@ function onCollision(ball, zone) {
 	}
 }
 
-function startDrag(ball) {
+function startDrag(ball, context) {
 	//can't move sprite by physics AND input
 	ball.body.moves = false;
 	ball.setVelocity(0, 0);
 }
 
-function stopDrag(ball) {
+function stopDrag(ball, context) {
 	//  re-enable it upon release
 	ball.body.moves = true;
 }
+
+function checkOverlap(spriteA, spriteB) {
+	var boundsA = spriteA.getBounds();
+	var boundsB = spriteB.getBounds();
+
+	return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+}
+
+const debounce = (callback, wait) => {
+	let timeoutId = null;
+	return (...args) => {
+		window.clearTimeout(timeoutId);
+		timeoutId = window.setTimeout(() => {
+			callback.apply(null, args);
+		}, wait);
+	};
+};
