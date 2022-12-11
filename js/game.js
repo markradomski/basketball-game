@@ -18,23 +18,25 @@ function preload() {
 
 function create() {
 	this.add.sprite(this.canvasWidth / 2, 250, 'backboard');
-	this.net = this.add.sprite(this.canvasWidth / 2, 303, 'net').setDepth(1);
+	this.net = this.add.sprite(this.canvasWidth / 2, 303, 'net').setDepth(2);
 	createBall(this);
 	createLeftRightRim(this);
 	createNetZone(this);
 	createSounds(this);
 
-	// score
-	this.scoreText = this.add.text(303, 50, 0, {
-		font: '80px Arial',
-		fill: '#FFF',
-	});
+	// scoreboard
+	this.scoreText = this.add
+		.text(303, 50, 0, {
+			font: '80px Arial',
+			fill: '#FFF',
+		})
+		.setDepth(0);
 
 	console.log('game', this);
 }
 
 function update() {
-	this.ball.setAngularVelocity(this.ball.body.velocity.x);
+	this.ball.setAngularVelocity(this.ball.body.velocity.x); // get ball spinning with its speed
 
 	const ballNetOverlap = isBallNetOverlap(this);
 	const ballVelocityY = this.ball.body.velocity.y;
@@ -69,12 +71,12 @@ function createBall(context) {
 		.setInteractive()
 		.setBounce(0.8)
 		.setCollideWorldBounds(true)
-		.setVelocity(0);
+		.setVelocity(0)
+		.setDepth(1);
 
 	context.ball.body.onWorldBounds = true;
 
-	console.log('BALL', context.ball.body.velocity);
-
+	// listen for ball hitting floor or walls
 	context.physics.world.on('worldbounds', (body, up, down, left, right) => {
 		// prevent AudioContext warning on initial poge load
 		if (context.sound.context.state !== 'suspended') {
@@ -97,8 +99,8 @@ function createBall(context) {
 	});
 }
 
+// add left and right net rim collision points for the ball to bounce off
 function createLeftRightRim(context) {
-	// net rim collision points
 	const zones = context.physics.add.staticGroup();
 
 	context.leftRim = context.add.zone(
@@ -118,6 +120,7 @@ function createLeftRightRim(context) {
 	context.physics.add.collider(context.ball, zones, onRimCollision.bind(context), null, context);
 }
 
+// add a smaller 'inner zone' to test for ball overlap
 function createNetZone(context) {
 	// ball/net overlap zone
 	context.innerNet = context.add.zone(context.canvasWidth / 2, 290).setSize(20, 20);
@@ -156,6 +159,7 @@ function stopDrag(ball, context) {
 	context.whoosh.play();
 }
 
+// has the ball overlapped the inner zone of the net
 function isBallNetOverlap(context) {
 	const ballTrigger = context.ball.body.touching;
 	const netTrigger = context.innerNet.body.touching;

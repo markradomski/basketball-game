@@ -1,6 +1,6 @@
 # Basketball game
 
-Drag and drop basketball game written with PhaserJS
+Drag and drop basketball game written with PhaserJS. View live [demo](https://markradomski.github.io/basketball-game//)
 
 
 
@@ -26,4 +26,4 @@ Will install http-server
 
 ## Game instructions
 
-Drag basketball with your mouse pointer and release.
+Drag basketball with your mouse pointer and release. Repeat.
