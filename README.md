@@ -1,6 +1,6 @@
 # Basketball game
 
-Drag and drop basketball game written with PhaserJS. View live [demo](https://markradomski.github.io/basketball-game//)
+Drag and drop basketball game written with PhaserJS and Gsap. View live [demo](https://markradomski.github.io/basketball-game//)
 
 
 

@@ -19,6 +19,7 @@ function preload() {
 function create() {
 	this.add.sprite(this.canvasWidth / 2, 250, 'backboard');
 	this.net = this.add.sprite(this.canvasWidth / 2, 303, 'net').setDepth(2);
+
 	createBall(this);
 	createLeftRightRim(this);
 	createNetZone(this);
@@ -31,8 +32,6 @@ function create() {
 			fill: '#FFF',
 		})
 		.setDepth(0);
-
-	console.log('game', this);
 }
 
 function update() {
@@ -45,9 +44,9 @@ function update() {
 	if (ballNetOverlap && !this.triggered) {
 		this.score++;
 		this.triggered = true;
-
-		console.log('SCORE', this.score);
 		this.scoreText.setText(this.score);
+
+		wobbleNet(this);
 	} else if (ballNetOverlap) {
 		// slow ball down while in net
 		this.ball.setVelocityY(ballVelocityY * 0.65);
@@ -123,11 +122,34 @@ function createLeftRightRim(context) {
 // add a smaller 'inner zone' to test for ball overlap
 function createNetZone(context) {
 	// ball/net overlap zone
-	context.innerNet = context.add.zone(context.canvasWidth / 2, 290).setSize(20, 20);
-	context.physics.world.enable(context.innerNet);
-	context.innerNet.body.setAllowGravity(false);
-	context.innerNet.body.moves = false;
-	context.physics.add.overlap(context.ball, context.innerNet);
+	context.netZone = context.add.zone(context.canvasWidth / 2, 290).setSize(20, 20);
+	context.physics.world.enable(context.netZone);
+	context.netZone.body.setAllowGravity(false);
+	context.netZone.body.moves = false;
+	context.physics.add.overlap(context.ball, context.netZone);
+}
+
+// shrink/expand net (could use some finessing)
+function wobbleNet(context) {
+	const tl = gsap.timeline({});
+
+	tl.to(context.net, {
+		displayHeight: 60,
+		displayOriginY: 44,
+		duration: 0.5,
+		ease: Power4.easeOut,
+	});
+
+	tl.to(
+		context.net,
+		{
+			displayHeight: 74,
+			displayOriginY: 37,
+			duration: 0.3,
+			ease: Power4.easeIn,
+		},
+		0.3
+	);
 }
 
 function onRimCollision(ball, zone) {
@@ -162,7 +184,7 @@ function stopDrag(ball, context) {
 // has the ball overlapped the inner zone of the net
 function isBallNetOverlap(context) {
 	const ballTrigger = context.ball.body.touching;
-	const netTrigger = context.innerNet.body.touching;
+	const netTrigger = context.netZone.body.touching;
 	return ballTrigger.down && netTrigger.up;
 }
 
