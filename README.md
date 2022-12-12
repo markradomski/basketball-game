@@ -7,7 +7,7 @@ Drag and drop basketball game written with PhaserJS and Gsap. View live [demo](h
 ## Setup
 
 Game requires a web server to run (due to CORS issues when loading assets). 
-You use either npm or your own.
+You can use either npm or your own.
 
 ### npm
 
